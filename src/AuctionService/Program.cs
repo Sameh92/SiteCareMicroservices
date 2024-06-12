@@ -34,6 +34,13 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
+        // to make the rabbitMQ working on Docker and change the username from localhost of rabbitMQ
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+         {
+             host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+             host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+         });
+
         cfg.ConfigureEndpoints(context);
     });
 });

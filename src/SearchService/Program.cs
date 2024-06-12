@@ -20,10 +20,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
-    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search",false));
+    x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
 
     x.UsingRabbitMq((context, cfg) =>
     {
+
+        // to make the rabbitMQ working on Docker and change the username from localhost of rabbitMQ
+        cfg.Host(builder.Configuration["RabbitMq:Host"], "/", host =>
+         {
+             host.Username(builder.Configuration.GetValue("RabbitMq:Username", "guest"));
+             host.Password(builder.Configuration.GetValue("RabbitMq:Password", "guest"));
+         });
+
         cfg.ReceiveEndpoint("search-auction-created", e =>
         {
             e.UseMessageRetry(r => r.Interval(5, 5));
